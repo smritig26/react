@@ -1,4 +1,4 @@
-import { useState , useCallback } from 'react'
+import { useState , useCallback ,useEffect, useRef} from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -9,20 +9,29 @@ function App() {
   const [char,setchar] = useState(false);
   const [pass,setpass] = useState("")
 
+  //useRef hook
+  const passRef = useRef(null);
+
   const passgen = useCallback(() => {
     let pass = ""
     let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     if(num) str += "0123456789"
     if(char) str += "!@#$%^&*~`{}[]+=_-"
 
-    for (let i = 0; i <= array.length; i++) {
+    for (let i = 0; i <= length; i++) {
       // const element = array[index];
-      let char = Math.floor(Math.random*str.length + 1)
-      pass = str.charAt(char);
+      let char = Math.floor(Math.random() * str.length);
+      pass += str.charAt(char);
     }
 
     setpass(pass);
   } , [length,num,char,setpass]) 
+  const copyPassToClip = useCallback(() => {
+    passRef.current?.select();
+    passRef.current?.setSelectionRange(0,length+1)
+    window.navigator.clipboard.writeText(pass);
+  },[pass])
+  useEffect(() => {passgen()} ,[length,num,char,passgen])
   return (
     <>
        <div className="w-full max-w-md mx-auto shadow-md rounded-lg px-4 py-3 my-8 bg-gray-800 text-orange-500">
@@ -34,9 +43,11 @@ function App() {
             className="outline-none w-full py-1 px-3"
             placeholder="Password"
             readOnly
-            
+            ref = {passRef}
         />
-        <button className='outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0'>Copy</button>
+        <button 
+        onClick={copyPassToClip}
+        className='outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0'>Copy</button>
 
         </div>
         <div className='flex text-sm gap-x-2'>
